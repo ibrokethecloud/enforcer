@@ -147,10 +147,5 @@ func (c Config) processPodSpec(p core.PodSpec) (status bool, message string) {
 		status, message = scanImage(p.Image, c.Severity)
 	}
 
-	// check if the old iamges need to be cleaned up
-	if c.Prune {
-		cleanImages()
-	}
-
 	return status, message
 }

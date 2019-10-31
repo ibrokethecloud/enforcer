@@ -13,16 +13,10 @@ func scanImage(image string, level string) (result bool, message string) {
 
 		return false, "No image specified"
 	}
-	logrus.Infof("About to pull image: %s\n", image)
-	dockerArgs := []string{"pull", "-q", image}
-	out, err := exec.Command("docker", dockerArgs...).Output()
-	if err != nil {
-		logrus.Info(string(out))
-		return false, err.Error()
-	}
+
 	logrus.Infof("About to scan image: %s\n", image)
 	trivyArgs := []string{"--exit-code", "1", "--severity", level, "--quiet", "--format", "json", image}
-	out, err = exec.Command("trivy", trivyArgs...).Output()
+	out, err := exec.Command("trivy", trivyArgs...).Output()
 	if err != nil {
 		logrus.Info(string(out))
 		return false, err.Error()

@@ -5,7 +5,7 @@ RUN cd /src/github.com/ibrokethecloud/enforcer \
     && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o enforcer -mod vendor 
 
 ## Using upstream aquasec kube-bench and layering it up
-FROM docker:stable
+FROM aquasec/trivy:latest
 COPY --from=builder /src/github.com/ibrokethecloud/enforcer/enforcer /usr/bin/enforcer
 COPY webhook* /certs/
 WORKDIR /
