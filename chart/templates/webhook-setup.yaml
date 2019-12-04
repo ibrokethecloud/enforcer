@@ -3,9 +3,10 @@
 {{- $ca := genCA "enforcer-ca" 365 }}
 {{- $cert := genSignedCert .Release.Name nil $altNames 365 $ca }}
 apiVersion: v1
-annotations:
-  "helm.sh/hook": "pre-install"
-  "helm.sh/hook-delete-policy": "before-hook-creation"
+metadata:
+  annotations:
+    "helm.sh/hook": "pre-install"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
 data:
   cert.pem: {{ $cert.Cert | b64enc }}
   key.pem: {{ $cert.Key | b64enc }}

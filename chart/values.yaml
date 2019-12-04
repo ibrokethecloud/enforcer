@@ -8,3 +8,10 @@ image:
   repository: gmehta3/enforcer
   tag: latest
   pullPolicy: Always
+
+# Persistence sections details with persistence of trivy cache.
+# This should speed up the initial cache.
+persistence:
+  enabled: true 
+  storageProvider: ""
+  storageAllocation: 10Gi

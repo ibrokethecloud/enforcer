@@ -7,7 +7,8 @@ RUN cd /src/github.com/ibrokethecloud/enforcer \
 ## Using upstream aquasec kube-bench and layering it up
 FROM aquasec/trivy:latest
 COPY --from=builder /src/github.com/ibrokethecloud/enforcer/enforcer /usr/bin/enforcer
-COPY webhook* /certs/
+RUN mkdir /certs/
+COPY docker-entrypoint.sh /
 WORKDIR /
-
-ENTRYPOINT [ "/usr/bin/enforcer","-severity","CRITICAL","-tls-cert-file","/certs/webhook.crt","-tls-key-file","/certs/webhookCA.key","-prune-images","true"  ]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD [ "/usr/bin/enforcer","-severity","CRITICAL","-tls-cert-file","/certs/webhook.crt","-tls-key-file","/certs/webhookCA.key","-prune-images","true"  ]

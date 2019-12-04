@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}
@@ -6,6 +6,9 @@ metadata:
     app: {{ .Release.Name }}
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
   template:
     metadata:
       labels:
@@ -16,6 +19,8 @@ spec:
           image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
+            - "/docker-entrypoint.sh"
+          args:
             - "enforcer"
             - "-severity"
             - "CRITICAL"
@@ -29,10 +34,19 @@ spec:
             - name: webhook-certs
               mountPath: /certs
               readOnly: true
+            {{- if .Values.persistence.enabled }}
+            - name: persistent-cache
+              mountPath: /root/.cache/
+            {{ end }}  
       volumes:
         - name: webhook-certs
           secret:
             secretName: enforcer-certs
+        {{- if .Values.persistence.enabled }}
+        - name: persistent-cache
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+        {{- end }}      
 ---
 apiVersion: v1
 kind: Service
