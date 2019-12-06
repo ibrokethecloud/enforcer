@@ -6,12 +6,13 @@ replicaCount: 1
 
 image:
   repository: gmehta3/enforcer
-  tag: latest
+  tag: "2"
   pullPolicy: Always
 
 # Persistence sections details with persistence of trivy cache.
 # This should speed up the initial cache.
 persistence:
   enabled: true 
-  storageProvider: ""
+  # Override for non default storage class 
+  storageProvider: "longhorn"
   storageAllocation: 10Gi

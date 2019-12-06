@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -22,6 +23,13 @@ func initFlags() *Config {
 func main() {
 
 	c := initFlags()
+
+	go func() {
+		for {
+			dbUpdate()
+			time.Sleep(12 * time.Hour)
+		}
+	}()
 
 	logrus.Info("Booting up Webhook...")
 	if err := c.Serve(); err != nil {

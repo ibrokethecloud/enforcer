@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/common/log"
@@ -14,7 +15,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 )
 
 var (
@@ -22,6 +25,8 @@ var (
 	runtimeScheme = runtime.NewScheme()
 	codecs        = serializer.NewCodecFactory(runtimeScheme)
 	deserializer  = codecs.UniversalDeserializer()
+	// GlobalAnnotationsKey is annotation needed Namespace or other Objects to skip scanning
+	GlobalAnnotationsKey = "disablescan.enforcer.io"
 )
 
 // Config is the parent struct to hold
@@ -127,6 +132,15 @@ func (c Config) processDeployment(rawObject []byte) (status bool, message string
 		return false, err.Error()
 	}
 
+	if checkNameSpace(d.GetNamespace()) {
+		logrus.Info("skipping validation due to namespace annotations")
+		return true, "Validation skipped due to annotations"
+	}
+
+	if parseAnnotations(d.GetAnnotations()) {
+		logrus.Info("skipping validation due to workload annotations")
+		return true, "Validation skipped due to annotations"
+	}
 	return c.processPodSpec(d.Spec.Template.Spec)
 }
 
@@ -136,6 +150,16 @@ func (c Config) processPod(rawObject []byte) (status bool, message string) {
 	if err != nil {
 		logrus.Error(err)
 		return false, err.Error()
+	}
+
+	if checkNameSpace(p.GetNamespace()) {
+		logrus.Info("skipping validation due to namespace annotations")
+		return true, "Validation skipped due to annotations"
+	}
+
+	if parseAnnotations(p.GetAnnotations()) {
+		logrus.Info("skipping validation due to annotations")
+		return true, "Validation skipped due to annotations"
 	}
 
 	return c.processPodSpec(p.Spec)
@@ -148,4 +172,38 @@ func (c Config) processPodSpec(p core.PodSpec) (status bool, message string) {
 	}
 
 	return status, message
+}
+
+func checkNameSpace(namespace string) bool {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+	// creates the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+
+	ns, err := clientset.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
+
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+
+	annotations := ns.GetAnnotations()
+
+	return parseAnnotations(annotations)
+}
+
+func parseAnnotations(annotation map[string]string) (status bool) {
+	if value, ok := annotation[GlobalAnnotationsKey]; ok {
+		status, _ = strconv.ParseBool(value)
+		//return status
+	}
+
+	return status
 }

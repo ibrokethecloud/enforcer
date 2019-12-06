@@ -34,3 +34,13 @@ func cleanImages() {
 		logrus.Error(err)
 	}
 }
+
+func dbUpdate() {
+	logrus.Infof("About to perform scheduled db refresh")
+	trivyArgs := []string{"--download-db-only"}
+	_, err := exec.Command("trivy", trivyArgs...).Output()
+	if err != nil {
+		logrus.Error(err)
+	}
+	logrus.Info("Trivy update completed")
+}
