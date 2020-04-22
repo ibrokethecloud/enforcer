@@ -9,6 +9,10 @@ image:
   tag: "2"
   pullPolicy: Always
 
+# Additional env variables like http/https proxies
+env:
+  - name: "SOMEVAR"
+    value: "SOMEVALUE"
 # Persistence sections details with persistence of trivy cache.
 # This should speed up the initial cache.
 persistence:
