@@ -5,7 +5,7 @@ RUN cd /src/github.com/ibrokethecloud/enforcer \
     && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o enforcer -mod vendor 
 
 ## Using upstream aquasec kube-bench and layering it up
-FROM aquasec/trivy:latest
+FROM aquasec/trivy:v0.6.0
 COPY --from=builder /src/github.com/ibrokethecloud/enforcer/enforcer /usr/bin/enforcer
 RUN mkdir /certs/
 COPY docker-entrypoint.sh /

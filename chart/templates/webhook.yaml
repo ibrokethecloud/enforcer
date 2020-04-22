@@ -18,6 +18,11 @@ spec:
         - name: {{ .Release.Name }}
           image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range .Values.env }}
+            - name: {{ .name }}
+              value: {{ .value }}
+          {{- end }}
           command:
             - "/docker-entrypoint.sh"
           args:

@@ -1,4 +1,4 @@
-{{- if .Values.persistence.enabled }}
+{{- if and .Values.persistence.enabled .Values.persistence.storageProvider }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -9,10 +9,6 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: {{ .Values.persistence.storageAllocation }}
-  {{- if .Values.persistence.storageProvider }}
-  storageClassName: ""
-  {{- else }}
+      storage: {{ .Values.persistence.storageAllocation | default "10Gi" }}
   storageClassName: {{ .Values.persistence.storageProvider }}
-  {{ end -}}
 {{ end -}}
