@@ -35,10 +35,14 @@ spec:
             - "/certs/key.pem"
             - "-port"
             - "443"
+            - "-ignorefile"
+            - "/mnt/trivyignore"
           volumeMounts:
             - name: webhook-certs
               mountPath: /certs
               readOnly: true
+            - name: ignorelist
+              mountPath: /mnt
             {{- if .Values.persistence.enabled }}
             - name: persistent-cache
               mountPath: /root/.cache/
@@ -47,6 +51,9 @@ spec:
         - name: webhook-certs
           secret:
             secretName: enforcer-certs
+        - name: ignorelist
+          configMap:
+            name: ignorelist
         {{- if .Values.persistence.enabled }}
         - name: persistent-cache
           persistentVolumeClaim:

@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: gmehta3/enforcer
-  tag: "2"
+  tag: "v0.9.1"
   pullPolicy: Always
 
 # Additional env variables like http/https proxies
