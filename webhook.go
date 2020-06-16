@@ -32,11 +32,12 @@ var (
 // Config is the parent struct to hold
 // information about webhook server
 type Config struct {
-	CertFile string
-	KeyFile  string
-	Port     string
-	Prune    bool
-	Severity string
+	CertFile   string
+	KeyFile    string
+	Port       string
+	Prune      bool
+	Severity   string
+	IgnoreFile string
 }
 
 // Serve is the wrapper for webhook for validation.
@@ -168,7 +169,7 @@ func (c Config) processPod(rawObject []byte) (status bool, message string) {
 func (c Config) processPodSpec(p core.PodSpec) (status bool, message string) {
 	for _, p := range p.Containers {
 		logrus.Infof("Received Image: %s", p.Image)
-		status, message = scanImage(p.Image, c.Severity)
+		status, message = scanImage(p.Image, c.Severity, c.IgnoreFile)
 	}
 
 	return status, message

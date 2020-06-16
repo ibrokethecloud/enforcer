@@ -8,14 +8,14 @@ import (
 
 // scanImage will use Trivy to scan
 // the container image and parse the results.
-func scanImage(image string, level string) (result bool, message string) {
+func scanImage(image string, level string, ignoreFile string) (result bool, message string) {
 	if len(image) == 0 {
 
 		return false, "No image specified"
 	}
 
 	logrus.Infof("About to scan image: %s\n", image)
-	trivyArgs := []string{"--exit-code", "1", "--severity", level, "--quiet", "--format", "json", image}
+	trivyArgs := []string{"--exit-code", "1", "--severity", level, "--quiet", "--format", "json", "--ignorefile", ignoreFile, image}
 	out, err := exec.Command("trivy", trivyArgs...).Output()
 	if err != nil {
 		logrus.Info(string(out))

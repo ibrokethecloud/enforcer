@@ -16,6 +16,7 @@ func initFlags() *Config {
 	fl.StringVar(&cfg.KeyFile, "tls-key-file", "", "TLS key file")
 	fl.StringVar(&cfg.Port, "port", "8080", "Port to start webhook on. Default 8080")
 	fl.StringVar(&cfg.Severity, "severity", "CRITICAL", "Severity level to check in images")
+	fl.StringVar(&cfg.IgnoreFile, "ignorefile", "/mnt/trivyignore", "Ignore file to be passed to enforcer")
 	fl.Parse(os.Args[1:])
 	return cfg
 }
