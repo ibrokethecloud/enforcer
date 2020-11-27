@@ -1,34 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Chart.Name }}-webhook
   labels:
-    app: {{ .Release.Name }}
+    app: {{ .Chart.Name }}-webhook
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      app: {{ .Chart.Name }}-webhook
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}
+        app: {{ .Chart.Name }}-webhook
     spec:
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}-webhook
           image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            {{- range .Values.env }}
+            {{- range .Values.client.env }}
             - name: {{ .name }}
               value: {{ .value }}
           {{- end }}
           command:
-            - "/docker-entrypoint.sh"
-          args:
             - "enforcer"
-            - "-severity"
-            - "CRITICAL"
+          args:
             - "-tls-cert-file"
             - "/certs/cert.pem"
             - "-tls-key-file"
@@ -43,10 +40,6 @@ spec:
               readOnly: true
             - name: ignorelist
               mountPath: /mnt
-            {{- if .Values.persistence.enabled }}
-            - name: persistent-cache
-              mountPath: /root/.cache/
-            {{ end }}  
       volumes:
         - name: webhook-certs
           secret:
@@ -54,21 +47,16 @@ spec:
         - name: ignorelist
           configMap:
             name: ignorelist
-        {{- if .Values.persistence.enabled }}
-        - name: persistent-cache
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
-        {{- end }}      
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Chart.Name }}-webhook
   labels:
-    app: {{ .Release.Name }}
+    app: {{ .Chart.Name }}-webhook
 spec:
   ports:
   - port: 443
     targetPort: 443
   selector:
-    app: {{ .Release.Name }}
+    app: {{ .Chart.Name }}-webhook

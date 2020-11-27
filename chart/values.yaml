@@ -6,17 +6,26 @@ replicaCount: 1
 
 image:
   repository: gmehta3/enforcer
-  tag: "v0.9.1"
+  tag: "rewrite"
   pullPolicy: Always
 
 # Additional env variables like http/https proxies
-env:
-  - name: "SOMEVAR"
-    value: "SOMEVALUE"
+server:
+  env:
+    - name: "TRIVY_LISTEN"
+      value: "0.0.0.0:4954"
+
+# TRIVY_REMOTE needs to be overriden if TRIVY SERVER is running on an alternate cluster.
+client:
+  env:
+    - name: "TRIVY_REMOTE"
+      value: "http://enforcer-server:4954"
+    - name: "TRIVY_SEVERITY" #Change this to control severity level for reporting
+      value: "LOW,MEDIUM,HIGH,CRITICAL"
 # Persistence sections details with persistence of trivy cache.
 # This should speed up the initial cache.
 persistence:
-  enabled: true 
+  enabled: false
   # Override for non default storage class 
   storageProvider: "longhorn"
   storageAllocation: 10Gi

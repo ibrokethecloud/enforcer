@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Chart.Name }}-server
+  labels:
+    app: {{ .Chart.Name }}-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}-server
+  serviceName: {{ .Chart.Name }}-server
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-server
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-server
+          image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range .Values.server.env }}
+            - name: {{ .name }}
+              value: {{ .value }}
+          {{- end }}
+            - name: TRIVY_CACHE_DIR
+              value: "/mnt/cache"
+          command:
+            - "trivy"
+          args:
+            - "server"
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: persistent-cache
+              mountPath: /mnt/cache
+      volumes:
+        - name: persistent-cache
+          persistentVolumeClaim:
+            claimName: {{ .Chart.Name }}-pvc
+          {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}-server
+  labels:
+    app: {{ .Chart.Name }}-server
+spec:
+  ports:
+    - port: 4954
+      targetPort: 4954
+  selector:
+    app: {{ .Chart.Name }}-server
